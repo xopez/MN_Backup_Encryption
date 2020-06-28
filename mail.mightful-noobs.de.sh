@@ -2,7 +2,7 @@
 BAKUPDIR=/root/backup
 HOMEDIR=/root
 FORMAT=$(date +%Y%m%d)-$(date +%H)
-export MAILCOW_BACKUP_LOCATION=$BAKUPDIR
+export MAILCOW_BACKUP_LOCATION=$BAKUPDIR/mailcow
 rclone delete --min-age 14d Nextcloud:/Backups/mail.mightful-noobs.de
 cd /opt/mailcow-dockerized
 helper-scripts/backup_and_restore.sh backup --delete-days 0 all
