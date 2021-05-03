@@ -6,7 +6,7 @@ echo Deleting old archives...
 rclone delete --min-age 14d SFTP:ts.mightful-noobs.de > /dev/null
 cd / || exit
 echo rsync /var
-rsync -a --delete --exclude '/var/backups' --exclude '/var/cache' --exclude '/var/lock' --exclude '/var/run' /var "$BACKUPDIR" > /dev/null
+rsync -a --delete --exclude '/var/backups' --exclude '/var/cache' --exclude '/var/local' --exclude '/var/lock' --exclude '/var/lib' --exclude '/var/log' --exclude '/var/mail' --exclude '/var/spool/mail' --exclude '/var/opt' --exclude '/var/run' --exclude '/var/tmp' /var "$BACKUPDIR" > /dev/null
 echo rsync /home
 rsync -a --delete /home "$BACKUPDIR" > /dev/null
 echo rsync /root
