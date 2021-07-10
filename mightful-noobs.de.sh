@@ -3,7 +3,7 @@ BACKUPDIR=/root/backup
 HOMEDIR=/root
 FORMAT=$(date +%Y%m%d)-$(date +%H)
 echo Deleting old archives...
-rclone delete --min-age 14d SFTP:mightful-noobs.de > /dev/null
+rclone delete --min-age 30d SFTP:mightful-noobs.de > /dev/null
 cd "$BACKUPDIR"/mariadb || exit
 echo MariaDB Backup
 count=$(find ./*.sql 2>/dev/null | wc -l)
