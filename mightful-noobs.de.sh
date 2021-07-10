@@ -26,4 +26,3 @@ cd "$HOMEDIR"/backuputils || exit
 gpg --passphrase-file encryption.txt -c --batch --yes --no-tty upload.tar.gz > /dev/null
 echo Uploading...
 rclone copyto upload.tar.gz.gpg SFTP:mightful-noobs.de/"$FORMAT".tar.gz.gpg > /dev/null
- 
