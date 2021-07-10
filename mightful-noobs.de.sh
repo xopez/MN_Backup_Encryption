@@ -10,7 +10,7 @@ count=$(find ./*.sql 2>/dev/null | wc -l)
 if [ "$count" != 0 ]; then
 	rm ./*.sql
 fi
-mydumper --regex '^(?!(mysql\.))' --outputdir $BACKUPDIR/mariadb --complete-insert --build-empty-files --kill-long-queries --use-savepoints --triggers --routines
+mydumper --regex '^(?!(mysql\.|sys\.))' --outputdir $BACKUPDIR/mariadb --complete-insert --build-empty-files --kill-long-queries --use-savepoints --triggers --routines
 cd / || exit
 echo rsync /var
 rsync -a --delete --exclude '/var/backups' --exclude '/var/cache' --exclude '/var/local' --exclude '/var/lock' --exclude '/var/lib' --exclude '/var/log' --exclude '/var/mail' --exclude '/var/spool/mail' --exclude '/var/opt' --exclude '/var/run' --exclude '/var/tmp' /var "$BACKUPDIR" > /dev/null
