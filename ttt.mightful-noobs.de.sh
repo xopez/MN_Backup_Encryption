@@ -11,6 +11,8 @@ echo rsync /etc
 rsync -a --delete /etc "$BACKUPDIR" > /dev/null
 echo rsync /root
 rsync -a --delete --exclude '/root/.gnupg' --exclude '/root/backuputils/upload.tar.g*' --exclude '/root/backup' /root "$BACKUPDIR" > /dev/null
+echo rsync /usr
+rsync -a --delete --exclude '/usr/bin' --exclude '/usr/games' --exclude '/usr/include' --exclude '/usr/lib*' --exclude '/usr/local' --exclude '/usr/sbin' --exclude '/usr/src' /usr "$BACKUPDIR" > /dev/null
 echo rsync /var
 rsync -a --delete --exclude '/var/backups' --exclude '/var/cache' --exclude '/var/local' --exclude '/var/lock' --exclude '/var/lib' --exclude '/var/log' --exclude '/var/mail' --exclude '/var/spool/mail' --exclude '/var/opt' --exclude '/var/run' --exclude '/var/tmp' /var "$BACKUPDIR" > /dev/null
 echo Packing...
