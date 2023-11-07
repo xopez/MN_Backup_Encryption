@@ -71,5 +71,5 @@ rm upload.tar.gz
 
 # Hochladen
 echo "Hochladen..."
-rclone copyto upload.tar.gz.gpg SFTP:ttt.mightful-noobs.de/"$DATE"/"$TIME".tar.gz.gpg > /dev/null
+rclone copyto upload.tar.gz.gpg SFTP:ttt.mightful-noobs.de/"$DATE"/"$TIME"/backup.tar.gz.gpg > /dev/null
 rm upload.tar.gz.gpg
