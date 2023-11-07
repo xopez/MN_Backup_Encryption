@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Konstanten für Verzeichnisse und Dateinamen
+# Verzeichnisse und Dateinamen definieren
 BACKUPDIR="/root/backup"
 HOMEDIR="/root"
 FORMAT=$(date +%Y%m%d)-$(date +%H)
 
-# Funktion zum Durchführen des Backups
+# Funktion zur Durchführung des Backups
 perform_backup() {
   SOURCE_DIR="$1"
   shift
@@ -15,50 +15,49 @@ perform_backup() {
   rsync -a --delete "${EXCLUDE_OPTIONS[@]}" "$SOURCE_DIR" "$BACKUPDIR" > /dev/null
 }
 
-# Funktion zum Löschen alter Archive
-delete_old_archives() {
-  echo "Lösche alte Archive..."
-  rclone delete --min-age 30d SFTP:ttt.mightful-noobs.de > /dev/null
-}
-
-# Backup-Optionen für verschiedene Verzeichnisse
-HOME_EXCLUDES=(
-  '/home/ttt/.local'
-  '/home/ttt/css'
-  '/home/ttt/serverfiles/bin'
-  '/home/ttt/serverfiles/sourceengine'
-  '/home/ttt/serverfiles/steamapps'
-  '/home/ttt/serverfiles/steam_cache'
-  '/home/ttt/serverfiles/garrysmod/*.vpk'
-  '/home/ttt/serverfiles/garrysmod/cache'
-)
-
-ETC_EXCLUDES=()  # Füge hier ggf. die passenden Exclude-Optionen für /etc ein
-
-ROOT_EXCLUDES=(
-  '/root/.gnupg'
-  '/root/backuputils/upload.tar.g*'
-  '/root/backup'
-)
-
-VAR_EXCLUDES=(
-  '/var/cache'
-  '/var/lock'
-  '/var/lib'
-  '/var/mail'
-  '/var/run'
-)
+# Alte Archive löschen
+echo "Lösche alte Archive..."
+rclone delete --min-age 30d SFTP:ttt.mightful-noobs.de > /dev/null
 
 cd /
 
-# Backup von verschiedenen Verzeichnissen durchführen
-perform_backup "/home" "${HOME_EXCLUDES[@]}"
-perform_backup "/etc" "${ETC_EXCLUDES[@]}"
-perform_backup "/root" "${ROOT_EXCLUDES[@]}"
-perform_backup "/var" "${VAR_EXCLUDES[@]}"
+# Backup von /home erstellen
+HOME_EXCLUDES=(
+  --exclude '/home/ttt/.local' 
+  --exclude '/home/ttt/css' 
+  --exclude '/home/ttt/serverfiles/bin' 
+  --exclude '/home/ttt/serverfiles/sourceengine' 
+  --exclude '/home/ttt/serverfiles/steamapps' 
+  --exclude '/home/ttt/serverfiles/steam_cache' 
+  --exclude '/home/ttt/serverfiles/garrysmod/*.vpk' 
+  --exclude '/home/ttt/serverfiles/garrysmod/cache'
+)
 
-# Alte Archive löschen
-delete_old_archives
+perform_backup "/home" "${HOME_EXCLUDES[@]}"
+
+# Backup von /etc erstellen
+ETC_EXCLUDES=()  # Hier ggf. die passenden Exclude-Optionen für /etc einfügen
+
+perform_backup "/etc" "${ETC_EXCLUDES[@]}"
+
+# Backup von /root erstellen
+ROOT_EXCLUDES=(
+  --exclude '/root/.gnupg' 
+  --exclude '/root/backuputils/upload.tar.g*' 
+  --exclude '/root/backup'
+)
+
+perform_backup "/root" "${ROOT_EXCLUDES[@]}"
+# Backup von /var erstellen
+VAR_EXCLUDES=(
+  --exclude '/var/cache' 
+  --exclude '/var/lock' 
+  --exclude '/var/lib' 
+  --exclude '/var/mail' 
+  --exclude '/var/run' 
+)
+
+perform_backup "/var" "${VAR_EXCLUDES[@]}"
 
 # Archiv packen
 echo "Packen..."
