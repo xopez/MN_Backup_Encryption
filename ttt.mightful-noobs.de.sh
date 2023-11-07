@@ -19,6 +19,8 @@ perform_backup() {
 echo "Lösche alte Archive..."
 rclone delete --min-age 30d SFTP:ttt.mightful-noobs.de > /dev/null
 
+cd /
+
 # Backup von /home erstellen
 HOME_EXCLUDES=(
   --exclude '/home/ttt/.local' 
