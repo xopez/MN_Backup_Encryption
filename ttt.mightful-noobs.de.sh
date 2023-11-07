@@ -4,33 +4,34 @@
 BACKUPDIR="/root/backup"
 HOMEDIR="/root"
 FORMAT=$(date +%Y%m%d)-$(date +%H)
+RSYNC_OPTS=(-a --delete)
 
 # Funktion zur Durchführung des Backups
 perform_backup() {
   SOURCE_DIR="$1"
-  shift
-  EXCLUDE_OPTIONS=("$@")
+  EXCLUDE_OPTIONS=("${@:2}")
 
   echo "Backup von $SOURCE_DIR erstellen..."
-  rsync -a --delete "${EXCLUDE_OPTIONS[@]}" "$SOURCE_DIR" "$BACKUPDIR" > /dev/null
+  rsync "${RSYNC_OPTS[@]}" "${EXCLUDE_OPTIONS[@]/#/--exclude=}" "$SOURCE_DIR" "$BACKUPDIR" > /dev/null
 }
 
 # Alte Archive löschen
 echo "Lösche alte Archive..."
 rclone delete --min-age 30d SFTP:ttt.mightful-noobs.de > /dev/null
 
-cd /
+# Wechseln zum Stammverzeichnis
+cd / || exit
 
 # Backup von /home erstellen
 HOME_EXCLUDES=(
-  --exclude '/home/ttt/.local' 
-  --exclude '/home/ttt/css' 
-  --exclude '/home/ttt/serverfiles/bin' 
-  --exclude '/home/ttt/serverfiles/sourceengine' 
-  --exclude '/home/ttt/serverfiles/steamapps' 
-  --exclude '/home/ttt/serverfiles/steam_cache' 
-  --exclude '/home/ttt/serverfiles/garrysmod/*.vpk' 
-  --exclude '/home/ttt/serverfiles/garrysmod/cache'
+  '/home/ttt/.local'
+  '/home/ttt/css'
+  '/home/ttt/serverfiles/bin'
+  '/home/ttt/serverfiles/sourceengine'
+  '/home/ttt/serverfiles/steamapps'
+  '/home/ttt/serverfiles/steam_cache'
+  '/home/ttt/serverfiles/garrysmod/*.vpk'
+  '/home/ttt/serverfiles/garrysmod/cache'
 )
 
 perform_backup "/home" "${HOME_EXCLUDES[@]}"
@@ -42,19 +43,20 @@ perform_backup "/etc" "${ETC_EXCLUDES[@]}"
 
 # Backup von /root erstellen
 ROOT_EXCLUDES=(
-  --exclude '/root/.gnupg' 
-  --exclude '/root/backuputils/upload.tar.g*' 
-  --exclude '/root/backup'
+  '/root/.gnupg'
+  '/root/backuputils/upload.tar.g*'
+  '/root/backup'
 )
 
 perform_backup "/root" "${ROOT_EXCLUDES[@]}"
+
 # Backup von /var erstellen
 VAR_EXCLUDES=(
-  --exclude '/var/cache' 
-  --exclude '/var/lock' 
-  --exclude '/var/lib' 
-  --exclude '/var/mail' 
-  --exclude '/var/run' 
+  '/var/cache'
+  '/var/lock'
+  '/var/lib'
+  '/var/mail'
+  '/var/run'
 )
 
 perform_backup "/var" "${VAR_EXCLUDES[@]}"
