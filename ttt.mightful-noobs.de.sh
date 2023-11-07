@@ -24,7 +24,7 @@ delete_old_archives() {
 # Backup-Optionen für verschiedene Verzeichnisse
 HOME_EXCLUDES=(
   '/home/ttt/.local'
-  '/home/ttt/css'
+  '/home/ttt/css' 
   '/home/ttt/serverfiles/bin'
   '/home/ttt/serverfiles/sourceengine'
   '/home/ttt/serverfiles/steamapps'
@@ -48,6 +48,8 @@ VAR_EXCLUDES=(
   '/var/mail'
   '/var/run'
 )
+
+cd /
 
 # Backup von verschiedenen Verzeichnissen durchführen
 perform_backup "/home" "${HOME_EXCLUDES[@]}"
