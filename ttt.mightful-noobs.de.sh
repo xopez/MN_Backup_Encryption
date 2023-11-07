@@ -34,12 +34,10 @@ HOME_EXCLUDES=(
   '/home/ttt/serverfiles/garrysmod/*.vpk'
   '/home/ttt/serverfiles/garrysmod/cache'
 )
-
 perform_backup "/home" "${HOME_EXCLUDES[@]}"
 
 # Backup von /etc erstellen
 ETC_EXCLUDES=()  # Hier ggf. die passenden Exclude-Optionen für /etc einfügen
-
 perform_backup "/etc" "${ETC_EXCLUDES[@]}"
 
 # Backup von /root erstellen
@@ -48,7 +46,6 @@ ROOT_EXCLUDES=(
   '/root/backuputils/upload.tar.g*'
   '/root/backup'
 )
-
 perform_backup "/root" "${ROOT_EXCLUDES[@]}"
 
 # Backup von /var erstellen
@@ -59,7 +56,6 @@ VAR_EXCLUDES=(
   '/var/mail'
   '/var/run'
 )
-
 perform_backup "/var" "${VAR_EXCLUDES[@]}"
 
 # Archiv packen
