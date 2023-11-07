@@ -3,7 +3,8 @@
 # Verzeichnisse und Dateinamen definieren
 BACKUPDIR="/root/backup"
 HOMEDIR="/root"
-FORMAT=$(date +%Y%m%d)-$(date +%H)
+DATE="$(date +%Y%m%d)"
+TIME="$(date +%H)"
 RSYNC_OPTS=(-a --delete)
 
 # Funktion zur Durchführung des Backups
@@ -17,7 +18,7 @@ perform_backup() {
 
 # Alte Archive löschen
 echo "Lösche alte Archive..."
-rclone delete --min-age 30d SFTP:ttt.mightful-noobs.de > /dev/null
+rclone delete --rmdirs --min-age 30d SFTP:ttt.mightful-noobs.de > /dev/null
 
 # Wechseln zum Stammverzeichnis
 cd / || exit
@@ -74,5 +75,5 @@ rm upload.tar.gz
 
 # Hochladen
 echo "Hochladen..."
-rclone copyto upload.tar.gz.gpg SFTP:ttt.mightful-noobs.de/"$FORMAT".tar.gz.gpg > /dev/null
+rclone copyto upload.tar.gz.gpg SFTP:ttt.mightful-noobs.de/"$DATE"/"$TIME".tar.gz.gpg > /dev/null
 rm upload.tar.gz.gpg
