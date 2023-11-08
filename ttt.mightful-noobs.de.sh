@@ -16,9 +16,15 @@ perform_backup() {
   rsync "${RSYNC_OPTS[@]}" "${EXCLUDE_OPTIONS[@]/#/--exclude=}" "$SOURCE_DIR" "$BACKUPDIR" > /dev/null
 }
 
+# Funktion zum Löschen alter Archive
+delete_old_archives() {
+  echo "Lösche alte Archive auf $1"
+  rclone delete --rmdirs --min-age 30d "$1" > /dev/null
+}
+
 # Alte Archive löschen
-echo "Lösche alte Archive..."
-rclone delete --rmdirs --min-age 30d SFTP:ttt.mightful-noobs.de > /dev/null
+delete_old_archives "SFTP-Falkenstein"
+delete_old_archives "SFTP-Helsinki"
 
 # Wechseln zum Stammverzeichnis
 cd / || exit
@@ -70,6 +76,12 @@ gpg --passphrase-file encryption.txt -c --batch --yes --no-tty upload.tar.gz > /
 rm upload.tar.gz
 
 # Hochladen
-echo "Hochladen..."
-rclone copyto upload.tar.gz.gpg SFTP:ttt.mightful-noobs.de/"$DATE"/"$TIME"/backup.tar.gz.gpg > /dev/null
+upload_backup() {
+  echo "Hochladen auf $1"
+  rclone copyto "upload.tar.gz.gpg" "$1:$DATE/$TIME.tar.gz.gpg" > /dev/null
+}
+
+upload_backup "SFTP-Falkenstein"
+upload_backup "SFTP-Helsinki"
+
 rm upload.tar.gz.gpg
