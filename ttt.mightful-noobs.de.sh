@@ -19,7 +19,7 @@ perform_backup() {
 # Funktion zum Löschen alter Archive
 delete_old_archives() {
   echo "Lösche alte Archive auf $1"
-  rclone delete --rmdirs --min-age 30d "$1" > /dev/null
+  rclone delete --rmdirs --min-age 30d "$1:" > /dev/null
 }
 
 # Alte Archive löschen
