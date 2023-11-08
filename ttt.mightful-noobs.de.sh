@@ -49,7 +49,7 @@ perform_backup "/etc" "${ETC_EXCLUDES[@]}"
 # Backup von /root erstellen
 ROOT_EXCLUDES=(
   '/root/.gnupg'
-  '/root/backuputils/upload.tar.g*'
+  '/root/backuputils/backup.tar.g*'
   '/root/backup'
 )
 perform_backup "/root" "${ROOT_EXCLUDES[@]}"
@@ -67,21 +67,21 @@ perform_backup "/var" "${VAR_EXCLUDES[@]}"
 # Archiv packen
 echo "Packen..."
 cd "$BACKUPDIR" || exit
-tar -zcvf "$HOMEDIR"/backuputils/upload.tar.gz ./* > /dev/null
+tar -zcvf "$HOMEDIR"/backuputils/backup.tar.gz ./* > /dev/null
 
 # Verschlüsseln
 echo "Verschlüsseln..."
 cd "$HOMEDIR"/backuputils || exit
-gpg --passphrase-file encryption.txt -c --batch --yes --no-tty upload.tar.gz > /dev/null
-rm upload.tar.gz
+gpg --passphrase-file encryption.txt -c --batch --yes --no-tty backup.tar.gz > /dev/null
+rm backup.tar.gz
 
 # Hochladen
 upload_backup() {
   echo "Hochladen auf $1"
-  rclone copyto "upload.tar.gz.gpg" "$1:$DATE/$TIME.tar.gz.gpg" > /dev/null
+  rclone copyto "backup.tar.gz.gpg" "$1:$DATE/$TIME/backup.tar.gz.gpg" > /dev/null
 }
 
 upload_backup "SFTP-Falkenstein"
 upload_backup "SFTP-Helsinki"
 
-rm upload.tar.gz.gpg
+rm backup.tar.gz.gpg
