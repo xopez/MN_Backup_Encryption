@@ -78,7 +78,7 @@ rm backup.tar.gz
 # Hochladen
 upload_backup() {
   echo "Hochladen auf $1"
-  rclone copyto "backup.tar.gz.gpg" "$1:$DATE/$TIME/backup.tar.gz.gpg" > /dev/null
+  rclone copyto "backup.tar.gz.gpg" "$1:$DATE/$DATE-$TIME-backup.tar.gz.gpg" > /dev/null
 }
 
 upload_backup "SFTP-Falkenstein"
