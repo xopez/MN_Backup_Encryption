@@ -13,13 +13,13 @@ perform_backup() {
   EXCLUDE_OPTIONS=("${@:2}")
 
   echo "Backup von $SOURCE_DIR erstellen..."
-  rsync "${RSYNC_OPTS[@]}" "${EXCLUDE_OPTIONS[@]/#/--exclude=}" "$SOURCE_DIR" "$BACKUPDIR" > /dev/null
+  rsync "${RSYNC_OPTS[@]}" "${EXCLUDE_OPTIONS[@]/#/--exclude=}" "$SOURCE_DIR" "$BACKUPDIR"
 }
 
 # Funktion zum Löschen alter Archive
 delete_old_archives() {
   echo "Lösche alte Archive auf $1"
-  rclone delete --rmdirs --min-age 30d "$1:" > /dev/null
+  rclone delete --rmdirs --min-age 30d "$1:"
 }
 
 # Alte Archive löschen
@@ -67,18 +67,18 @@ perform_backup "/var" "${VAR_EXCLUDES[@]}"
 # Archiv packen
 echo "Packen..."
 cd "$BACKUPDIR" || exit
-tar -zcvf "$HOMEDIR"/backuputils/backup.tar.gz ./* > /dev/null
+tar -zcf "$HOMEDIR"/backuputils/backup.tar.gz ./*
 
 # Verschlüsseln
 echo "Verschlüsseln..."
 cd "$HOMEDIR"/backuputils || exit
-gpg --passphrase-file encryption.txt -c --batch --yes --no-tty backup.tar.gz > /dev/null
+gpg --passphrase-file encryption.txt -c --batch --yes --no-tty backup.tar.gz
 rm backup.tar.gz
 
 # Hochladen
 upload_backup() {
   echo "Hochladen auf $1"
-  rclone copyto "backup.tar.gz.gpg" "$1:$DATE/$DATE-$TIME-backup.tar.gz.gpg" > /dev/null
+  rclone copyto "backup.tar.gz.gpg" "$1:$DATE/$DATE-$TIME-backup.tar.gz.gpg"
 }
 
 upload_backup "SFTP-Falkenstein"
