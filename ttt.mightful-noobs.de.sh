@@ -7,15 +7,6 @@ DATE="$(date +%Y%m%d)"
 TIME="$(date +%H)"
 RSYNC_OPTS=(-a --delete)
 
-# Funktion zur Durchführung des Backups
-perform_backup() {
-  SOURCE_DIR="$1"
-  EXCLUDE_OPTIONS=("${@:2}")
-
-  echo "Backup von $SOURCE_DIR erstellen..."
-  rsync "${RSYNC_OPTS[@]}" "${EXCLUDE_OPTIONS[@]/#/--exclude=}" "$SOURCE_DIR" "$BACKUPDIR"
-}
-
 # Funktion zum Löschen alter Archive
 delete_old_archives() {
   echo "Lösche alte Archive auf $1"
@@ -28,6 +19,15 @@ delete_old_archives "SFTP-Helsinki"
 
 # Wechseln zum Stammverzeichnis
 cd / || exit
+
+# Funktion zur Durchführung des Backups
+perform_backup() {
+  SOURCE_DIR="$1"
+  EXCLUDE_OPTIONS=("${@:2}")
+
+  echo "Backup von $SOURCE_DIR erstellen..."
+  rsync "${RSYNC_OPTS[@]}" "${EXCLUDE_OPTIONS[@]/#/--exclude=}" "$SOURCE_DIR" "$BACKUPDIR"
+}
 
 # Backup von /home erstellen
 HOME_EXCLUDES=(
