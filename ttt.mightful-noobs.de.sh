@@ -1,87 +1,89 @@
 #!/bin/bash
 
-# Verzeichnisse und Dateinamen definieren
+# === Konfiguration ===
 BACKUPDIR="/root/backup"
 HOMEDIR="/root"
 DATE="$(date +%Y%m%d)"
 TIME="$(date +%H)"
+ARCHIVE_NAME="backup.tar.gz"
+ENCRYPTED_NAME="$ARCHIVE_NAME.gpg"
 RSYNC_OPTS=(-a --delete)
+REMOTE_TARGETS=("SFTP-Falkenstein" "SFTP-Helsinki")
+LOGFILE="/var/log/backup_script.log"
 
-# Funktion zum Löschen alter Archive
+# === Logging-Funktion ===
+log() {
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOGFILE"
+}
+
+# === Alte Archive löschen ===
 delete_old_archives() {
-  echo "Lösche alte Archive auf $1"
-  rclone delete --rmdirs --min-age 30d "$1:"
+  for target in "${REMOTE_TARGETS[@]}"; do
+    log "Lösche alte Archive auf $target"
+    rclone delete --rmdirs --min-age 30d "$target:" || log "Fehler beim Löschen auf $target"
+  done
 }
 
-# Alte Archive löschen
-delete_old_archives "SFTP-Falkenstein"
-delete_old_archives "SFTP-Helsinki"
-
-# Wechseln zum Stammverzeichnis
-cd / || exit
-
-# Funktion zur Durchführung des Backups
+# === Backup-Funktion ===
 perform_backup() {
-  SOURCE_DIR="$1"
-  EXCLUDE_OPTIONS=("${@:2}")
+  local source="$1"
+  shift
+  local excludes=("$@")
 
-  echo "Backup von $SOURCE_DIR erstellen..."
-  rsync "${RSYNC_OPTS[@]}" "${EXCLUDE_OPTIONS[@]/#/--exclude=}" "$SOURCE_DIR" "$BACKUPDIR"
+  log "Erstelle Backup von $source"
+  rsync "${RSYNC_OPTS[@]}" "${excludes[@]/#/--exclude=}" "$source" "$BACKUPDIR" || log "Fehler beim Backup von $source"
 }
 
-# Backup von /home erstellen
-HOME_EXCLUDES=(
-  '/home/ttt/.local'
-  '/home/ttt/css'
-  '/home/ttt/serverfiles/bin'
-  '/home/ttt/serverfiles/sourceengine'
-  '/home/ttt/serverfiles/steamapps'
-  '/home/ttt/serverfiles/steam_cache'
-  '/home/ttt/serverfiles/garrysmod/*.vpk'
+# === Backup durchführen ===
+delete_old_archives
+
+cd / || { log "Fehler beim Wechsel ins Root-Verzeichnis"; exit 1; }
+
+perform_backup "/home" \
+  '/home/ttt/.local' \
+  '/home/ttt/css' \
+  '/home/ttt/serverfiles/bin' \
+  '/home/ttt/serverfiles/sourceengine' \
+  '/home/ttt/serverfiles/steamapps' \
+  '/home/ttt/serverfiles/steam_cache' \
+  '/home/ttt/serverfiles/garrysmod/*.vpk' \
   '/home/ttt/serverfiles/garrysmod/cache'
-)
-perform_backup "/home" "${HOME_EXCLUDES[@]}"
 
-# Backup von /etc erstellen
-ETC_EXCLUDES=()  # Hier ggf. die passenden Exclude-Optionen für /etc einfügen
-perform_backup "/etc" "${ETC_EXCLUDES[@]}"
+perform_backup "/etc"
 
-# Backup von /root erstellen
-ROOT_EXCLUDES=(
-  '/root/.gnupg'
-  '/root/backuputils/backup.tar.g*'
+perform_backup "/root" \
+  '/root/.gnupg' \
+  '/root/backuputils/backup.tar.g*' \
   '/root/backup'
-)
-perform_backup "/root" "${ROOT_EXCLUDES[@]}"
 
-# Backup von /var erstellen
-VAR_EXCLUDES=(
-  '/var/cache'
-  '/var/lock'
-  '/var/lib'
-  '/var/mail'
+perform_backup "/var" \
+  '/var/cache' \
+  '/var/lock' \
+  '/var/lib' \
+  '/var/mail' \
   '/var/run'
-)
-perform_backup "/var" "${VAR_EXCLUDES[@]}"
 
-# Archiv packen
-echo "Packen..."
-cd "$BACKUPDIR" || exit
-tar -zcf "$HOMEDIR"/backuputils/backup.tar.gz ./*
+# === Archiv packen ===
+log "Packe Archiv..."
+cd "$BACKUPDIR" || { log "Fehler beim Wechsel ins Backup-Verzeichnis"; exit 1; }
+tar -zcf "$HOMEDIR/backuputils/$ARCHIVE_NAME" ./* || log "Fehler beim Packen des Archivs"
 
-# Verschlüsseln
-echo "Verschlüsseln..."
-cd "$HOMEDIR"/backuputils || exit
-gpg --passphrase-file encryption.txt -c --batch --yes --no-tty backup.tar.gz
-rm backup.tar.gz
+# === Verschlüsseln ===
+log "Verschlüssle Archiv..."
+cd "$HOMEDIR/backuputils" || { log "Fehler beim Wechsel ins backuputils-Verzeichnis"; exit 1; }
+gpg --passphrase-file encryption.txt -c --batch --yes --no-tty "$ARCHIVE_NAME" || log "Fehler beim Verschlüsseln"
+rm "$ARCHIVE_NAME"
 
-# Hochladen
+# === Hochladen ===
 upload_backup() {
-  echo "Hochladen auf $1"
-  rclone copyto "backup.tar.gz.gpg" "$1:$DATE/$DATE-$TIME-backup.tar.gz.gpg"
+  for target in "${REMOTE_TARGETS[@]}"; do
+    log "Lade Backup auf $target hoch"
+    rclone copyto "$ENCRYPTED_NAME" "$target:$DATE/${DATE}-${TIME}-$ENCRYPTED_NAME" || log "Fehler beim Hochladen auf $target"
+  done
 }
 
-upload_backup "SFTP-Falkenstein"
-upload_backup "SFTP-Helsinki"
+upload_backup
 
-rm backup.tar.gz.gpg
+# === Aufräumen ===
+rm "$ENCRYPTED_NAME"
+log "Backup abgeschlossen."
