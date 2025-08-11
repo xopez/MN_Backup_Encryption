@@ -41,7 +41,6 @@ cd / || { log "Fehler beim Wechsel ins Root-Verzeichnis"; exit 1; }
 
 perform_backup "/home" \
   '/home/ttt/.local' \
-  '/home/ttt/css' \
   '/home/ttt/serverfiles/bin' \
   '/home/ttt/serverfiles/sourceengine' \
   '/home/ttt/serverfiles/steamapps' \
