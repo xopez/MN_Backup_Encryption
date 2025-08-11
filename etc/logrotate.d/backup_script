@@ -1,0 +1,7 @@
+/var/log/backup_script.log {
+    weekly
+    rotate 12
+    missingok
+    notifempty
+    create 640 root adm
+}
