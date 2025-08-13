@@ -10,6 +10,7 @@ ENCRYPTED_NAME="$ARCHIVE_NAME.gpg"
 RSYNC_OPTS=(-a --delete)
 REMOTE_TARGETS=("SFTP-Falkenstein" "SFTP-Helsinki")
 LOGFILE="/var/log/backup_script.log"
+BACKUP_GPG_RECIPIENT="xxxx@xxxxx.xx"
 
 # === Logging-Funktion ===
 log() {
@@ -82,7 +83,7 @@ cd "$HOMEDIR/backuputils" || {
     log "Fehler beim Wechsel ins backuputils-Verzeichnis"
     exit 1
 }
-gpg --passphrase-file encryption.txt -c --batch --yes --no-tty "$ARCHIVE_NAME" || log "Fehler beim Verschlüsseln"
+gpg -e -r "$BACKUP_GPG_RECIPIENT" --batch --yes --no-tty "$ARCHIVE_NAME" || log "Fehler beim Verschlüsseln"
 rm "$ARCHIVE_NAME"
 
 # === Hochladen ===
